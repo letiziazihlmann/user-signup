@@ -41,7 +41,48 @@ page_footer = """
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = page_header + page_footer
+        body = '''
+        <form method='post'>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <label for='Username'>Username</label>
+                        </td>
+                        <td>
+                            <input name='Username' type='text' value required>
+                        </td>
+                    <tr>
+                    <tr>
+                        <td>
+                            <label for='Password'>Password</label>
+                        </td>
+                        <td>
+                            <input name='password' type='password' value required>
+                        </td>
+                    <tr>
+                    <tr>
+                        <td>
+                            <label for='Verify'>Verify Password</label>
+                        </td>
+                        <td>
+                            <input name='verify' type='password' value required>
+                        </td>
+                    <tr>
+                    <tr>
+                        <td>
+                            <label for='Email'>Email</label>
+                        </td>
+                        <td>
+                            <input name='email' type='email' value required>
+                        </td>
+                    </tr>
+            </table>
+            <input type='submit'>
+        </form>
+        '''
+
+        content = page_header + body + page_footer
         self.response.write(content)
 
 app = webapp2.WSGIApplication([
