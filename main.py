@@ -43,7 +43,7 @@ page_footer = """
 class MainHandler(webapp2.RequestHandler):
     def get(self):
         body = '''
-        <form action='/welcome' method='post'>
+        <form method='post'>
             <table>
                 <tbody>
                     <tr>
@@ -115,18 +115,21 @@ class MainHandler(webapp2.RequestHandler):
                 username_error = "Please enter a valid username"
                 self.redirect("/?error=" + username_error)
 
+            content = page_header + body + error_element + page_footer
+            self.response.write(content)
 
 
 
-class WelcomeHandler(webapp2.RequestHandler):
 
-    def post(self):
-        username = self.request.get('username')
-        welcome_body = "<h1>Welcome " + username + "</h1>"
-        self.response.write(welcome_body)
+#class WelcomeHandler(webapp2.RequestHandler):
+
+    #def post(self):
+        #username = self.request.get('username')
+        #welcome_body = "<h1>Welcome " + username + "</h1>"
+        #self.response.write(welcome_body)
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler),
-    ('/welcome', WelcomeHandler)
+    ('/', MainHandler)
+    #('/welcome', WelcomeHandler)
 ], debug=True)
