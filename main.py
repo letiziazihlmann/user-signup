@@ -34,11 +34,26 @@ page_header = """
     </h1>
 """
 
+
+
 # html boilerplate for the bottom of every page
 page_footer = """
 </body>
 </html>
 """
+
+# function to test if the username is valid - will be used on line 104
+user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def username_valid(username):
+    return username and user_re.match(username)
+
+password_re = re.compile(r"^.{3,20}$")
+def password_valid(password):
+    return password and password_re.match(password)
+
+email_re = re.compile(r"[/S]+@[/S]+.[/S]+$")
+def email_valid(email):
+    return not email or email_re.match(email)
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -52,7 +67,7 @@ class MainHandler(webapp2.RequestHandler):
                         </td>
                         <td>
                             <input name='username' type='text' value required>
-                            <span class='error'></span>
+                            <span class='error' name='username_error'></span>
                         </td>
                     <tr>
                     <tr>
@@ -61,6 +76,7 @@ class MainHandler(webapp2.RequestHandler):
                         </td>
                         <td>
                             <input name='password' type='password' value="" value required>
+                            <span class='error' name='password_error'></span>
                         </td>
                     <tr>
                     <tr>
@@ -69,16 +85,16 @@ class MainHandler(webapp2.RequestHandler):
                         </td>
                         <td>
                             <input name='verify' type='password' value="" value required>
-                            <span class='error'></span>
+                            <span class='error' name='verify_error'></span>
                         </td>
                     <tr>
                     <tr>
                         <td>
-                            <label for='email'>Email</label>
+                            <label for='email'>Email (Optional)</label>
                         </td>
                         <td>
                             <input name='email' type='email'>
-                            <span class='error'></span>
+                            <span class='error' name='email_error'></span>
                         </td>
                     </tr>
             </table>
@@ -86,50 +102,67 @@ class MainHandler(webapp2.RequestHandler):
         </form>
         '''
 
-        error = self.request.get("error")
-        if error:
-            error_esc = cgi.escape(error, quote=True)
-            error_element = '<p class="error">' + error_esc + '</p>'
-        else:
-            error_element = ''
-
         content = page_header + body + page_footer
         self.response.write(content)
 
-        def post(self):
-            #this will pull all of the values entered for the above inputs and assign them to a variable that i can use to test
-            # if the input is valid
-            entered_username = self.request.get('username')
-            entered_password = self.request.get('password')
-            entered_verify = self.request.get('verify')
-            entered_email = self.request.get('email')
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
 
-            #starting to validate the input, the re_username.match(entered_username) should be a boolean so true or false
-            re_username = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-            def valid_username(entered_username):
-                username_valid = re_username.match(entered_username)
-                return username_valid
+        error = False
+        #test 1: username should be 3-20 letters, no spaces, can contain dashes and underscores
+        #if username is not valid:
+        username_error = ''
+        if not username_valid(username):
+            #enter an error - error + username_error
+            username_error += "Please enter a valid username"
+            error = True
 
-            #test to see if the username is valid if not, line 109 will redirect to line 89
-            if username_valid == False:
-                username_error = "Please enter a valid username"
-                self.redirect("/?error=" + username_error)
+        #test 2: must be 3-20 characters
+        #if password is not valid:
+        password_error =''
+        if not password_valid(password):
+            #enter an error - error + password_error
+            password_error += "Please enter a valid password"
+            error = True
 
-            content = page_header + body + error_element + page_footer
+        #test 3: verfies that password and verify matches
+        #if password != verify:
+        verify_error = ''
+        if password_valid(password) and password != verify:
+            #enter an error - error + verify_error
+            verify_error += "Please enter a matching password"
+            error = True
+
+        #test 4: email address is valid
+        #if email is not valid:
+        email_error = ''
+        if not email_valid(email):
+            #enter an error - error + email_error
+            email_error += "Please enter a valid email address"
+            error = True
+
+        if error == True:
+            content = page_header + body + page_footer
             self.response.write(content)
+        #if all is valid - redirect to Welcome page
+        else:
+            self.redirect('/welcome')
 
 
+        #self.response.write(username + password + verify + email)
 
+class WelcomeHandler(webapp2.RequestHandler):
+    def get(self):
+        username = self.request.get('username')
+        body = "<h1>Welcome, " + username + "</h1>"
 
-#class WelcomeHandler(webapp2.RequestHandler):
-
-    #def post(self):
-        #username = self.request.get('username')
-        #welcome_body = "<h1>Welcome " + username + "</h1>"
-        #self.response.write(welcome_body)
+        self.response.write(body)
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
-    #('/welcome', WelcomeHandler)
+    ('/', MainHandler),
+    ('/welcome', WelcomeHandler)
 ], debug=True)
