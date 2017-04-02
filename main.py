@@ -17,6 +17,8 @@
 import webapp2
 import re
 
+
+
 page_header = """
 <!DOCTYPE html>
 <html>
@@ -34,13 +36,58 @@ page_header = """
     </h1>
 """
 
-
+body = '''
+<form method='post'>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <label for='username'>Username</label>
+                </td>
+                <td>
+                    <input name='username' type='text' value required>
+                    <span class='error' name='username_error'>%(username_error)s</span>
+                </td>
+            <tr>
+            <tr>
+                <td>
+                    <label for='password'>Password</label>
+                </td>
+                <td>
+                    <input name='password' type='password' value="" value required>
+                    <span class='error' name='password_error'>%(password_error)s</span>
+                </td>
+            <tr>
+            <tr>
+                <td>
+                    <label for='verify'>Verify Password</label>
+                </td>
+                <td>
+                    <input name='verify' type='password' value="" value required>
+                    <span class='error' name='verify_error'>%(verify_error)s</span>
+                </td>
+            <tr>
+            <tr>
+                <td>
+                    <label for='email'>Email (Optional)</label>
+                </td>
+                <td>
+                    <input name='email' type='email'>
+                    <span class='error' name='email_error'>%(email_error)s</span>
+                </td>
+            </tr>
+    </table>
+    <input type='submit'>
+</form>
+'''
 
 # html boilerplate for the bottom of every page
 page_footer = """
 </body>
 </html>
 """
+
+
 
 # function to test if the username is valid - will be used on line 104
 user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -56,54 +103,12 @@ def email_valid(email):
     return not email or email_re.match(email)
 
 class MainHandler(webapp2.RequestHandler):
-    def get(self):
-        body = '''
-        <form method='post'>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>
-                            <label for='username'>Username</label>
-                        </td>
-                        <td>
-                            <input name='username' type='text' value required>
-                            <span class='error' name='username_error'></span>
-                        </td>
-                    <tr>
-                    <tr>
-                        <td>
-                            <label for='password'>Password</label>
-                        </td>
-                        <td>
-                            <input name='password' type='password' value="" value required>
-                            <span class='error' name='password_error'></span>
-                        </td>
-                    <tr>
-                    <tr>
-                        <td>
-                            <label for='verify'>Verify Password</label>
-                        </td>
-                        <td>
-                            <input name='verify' type='password' value="" value required>
-                            <span class='error' name='verify_error'></span>
-                        </td>
-                    <tr>
-                    <tr>
-                        <td>
-                            <label for='email'>Email (Optional)</label>
-                        </td>
-                        <td>
-                            <input name='email' type='email'>
-                            <span class='error' name='email_error'></span>
-                        </td>
-                    </tr>
-            </table>
-            <input type='submit'>
-        </form>
-        '''
+    def write_form(self, username_error = '', password_error ='', verify_error = '', email_error = '' ):
+        self.response.write(body % {"username_error": username_error, "password_error": password_error, "verify_error": verify_error, "email_error": email_error})
 
-        content = page_header + body + page_footer
-        self.response.write(content)
+    def get(self):
+        self.write_form()
+
 
     def post(self):
         username = self.request.get('username')
@@ -122,7 +127,7 @@ class MainHandler(webapp2.RequestHandler):
 
         #test 2: must be 3-20 characters
         #if password is not valid:
-        password_error =''
+        password_error = ''
         if not password_valid(password):
             #enter an error - error + password_error
             password_error += "Please enter a valid password"
@@ -145,8 +150,7 @@ class MainHandler(webapp2.RequestHandler):
             error = True
 
         if error == True:
-            content = page_header + body + page_footer
-            self.response.write(content)
+            self.write_form(username_error, password_error, verify_error, email_error)
         #if all is valid - redirect to Welcome page
         else:
             self.redirect('/welcome')
@@ -156,7 +160,7 @@ class MainHandler(webapp2.RequestHandler):
 
 class WelcomeHandler(webapp2.RequestHandler):
     def get(self):
-        username = self.request.get('username')
+        username = self.request.get("username")
         body = "<h1>Welcome, " + username + "</h1>"
 
         self.response.write(body)
