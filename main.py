@@ -45,7 +45,7 @@ body = '''
                     <label for='username'>Username</label>
                 </td>
                 <td>
-                    <input name='username' type='text' value required>
+                    <input name='username' type='text' value required value="%(username)s">
                     <span class='error' name='username_error'>%(username_error)s</span>
                 </td>
             <tr>
@@ -72,7 +72,7 @@ body = '''
                     <label for='email'>Email (Optional)</label>
                 </td>
                 <td>
-                    <input name='email' type='email'>
+                    <input name='email' type='email' value='%(email)s'>
                     <span class='error' name='email_error'>%(email_error)s</span>
                 </td>
             </tr>
@@ -103,8 +103,13 @@ def email_valid(email):
     return not email or email_re.match(email)
 
 class MainHandler(webapp2.RequestHandler):
-    def write_form(self, username_error = '', password_error ='', verify_error = '', email_error = '' ):
-        self.response.write(body % {"username_error": username_error, "password_error": password_error, "verify_error": verify_error, "email_error": email_error})
+    def write_form(self,username='', username_error = '', password_error ='', verify_error = '', email_error = '', email = '' ):
+        self.response.write(body % {"username": username,
+                                    "username_error": username_error,
+                                    "password_error": password_error,
+                                    "verify_error": verify_error,
+                                    "email_error": email_error,
+                                    "email": email})
 
     def get(self):
         self.write_form()
@@ -115,6 +120,8 @@ class MainHandler(webapp2.RequestHandler):
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
+
+
 
         error = False
         #test 1: username should be 3-20 letters, no spaces, can contain dashes and underscores
@@ -150,7 +157,7 @@ class MainHandler(webapp2.RequestHandler):
             error = True
 
         if error == True:
-            self.write_form(username_error, password_error, verify_error, email_error)
+            self.write_form(username, username_error, password_error, verify_error, email_error, email)
         #if all is valid - redirect to Welcome page
         else:
             self.redirect('/welcome')
