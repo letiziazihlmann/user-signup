@@ -19,7 +19,7 @@ import re
 
 
 
-page_header = """
+body = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,9 +34,6 @@ page_header = """
     <h1>
         <a href="/">User Signup</a>
     </h1>
-"""
-
-body = '''
 <form method='post'>
     <table>
         <tbody>
@@ -79,10 +76,6 @@ body = '''
     </table>
     <input type='submit'>
 </form>
-'''
-
-# html boilerplate for the bottom of every page
-page_footer = """
 </body>
 </html>
 """
@@ -103,7 +96,7 @@ def email_valid(email):
     return not email or email_re.match(email)
 
 class MainHandler(webapp2.RequestHandler):
-    def write_form(self,username='', username_error = '', password_error ='', verify_error = '', email_error = '', email = '' ):
+    def write_form(self, username='', username_error = '', password_error ='', verify_error = '', email_error = '', email = '' ):
         self.response.write(body % {"username": username,
                                     "username_error": username_error,
                                     "password_error": password_error,
@@ -160,7 +153,7 @@ class MainHandler(webapp2.RequestHandler):
             self.write_form(username, username_error, password_error, verify_error, email_error, email)
         #if all is valid - redirect to Welcome page
         else:
-            self.redirect('/welcome')
+            self.redirect('/welcome?username=' + username)
 
 
         #self.response.write(username + password + verify + email)
