@@ -42,7 +42,7 @@ body = """
                     <label for='username'>Username</label>
                 </td>
                 <td>
-                    <input name='username' type='text' value required value="%(username)s">
+                    <input name='username' type='text' value='%(username)s' value required></input>
                     <span class='error' name='username_error'>%(username_error)s</span>
                 </td>
             <tr>
@@ -91,7 +91,7 @@ password_re = re.compile(r"^.{3,20}$")
 def password_valid(password):
     return password and password_re.match(password)
 
-email_re = re.compile(r"[/S]+@[/S]+.[/S]+$")
+email_re = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 def email_valid(email):
     return not email or email_re.match(email)
 
@@ -109,7 +109,7 @@ class MainHandler(webapp2.RequestHandler):
 
 
     def post(self):
-        username = self.request.get('username')
+        username = self.request.get("username")
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
